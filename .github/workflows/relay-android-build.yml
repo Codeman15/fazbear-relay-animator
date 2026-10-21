@@ -1,0 +1,41 @@
+
+name: Fazbear Relay Animator Android Build
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - fazbear-relay-animator
+    paths:
+      - "FazbearRelayAnimator/**"
+      - ".github/workflows/relay-android-build.yml"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Build debug APK
+        working-directory: FazbearRelayAnimator
+        run: |
+          if [ ! -f gradlew ]; then
+            echo "ERROR: Gradle wrapper is missing."
+            exit 1
+          fi
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - name: Upload APK
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fazbear-relay-animator-debug-apk
+          path: FazbearRelayAnimator/app/build/outputs/apk/debug/*.apk
